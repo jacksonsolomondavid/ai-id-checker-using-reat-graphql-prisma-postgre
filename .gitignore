@@ -1,0 +1,35 @@
+# ENV FILES (DO NOT UPLOAD)
+backend/.env
+backend/python-service/.env
+.env
+
+# NODE MODULES
+backend/node_modules/
+frontend/node_modules/
+node_modules/
+
+# PYTHON ENV (inside backend)
+backend/python-service/venv/
+backend/python-service/.venv/
+backend/python-service/__pycache__/
+__pycache__/
+
+# TEMP UPLOADS
+backend/tmp/
+tmp/
+*.log
+
+# BUILD / DIST FILES
+frontend/build/
+backend/dist/
+
+# SYSTEM / EDITOR FILES
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# PYTHON CACHE
+*.pyc
+*.pyo
+*.pyd

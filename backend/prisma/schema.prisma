@@ -1,0 +1,16 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Verification {
+  id             Int      @id @default(autoincrement())
+  verdict        String
+  parsed_id_data Json?
+  raw_json       Json
+  created_at     DateTime @default(now())
+}

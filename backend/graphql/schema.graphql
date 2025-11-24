@@ -1,0 +1,19 @@
+scalar Upload
+scalar JSON
+
+type Verification {
+  id: ID!
+  verdict: String!
+  parsed_id_data: JSON
+  raw_json: JSON
+  created_at: String!
+}
+
+type Query {
+  verification(id: ID!): Verification
+  recentVerifications(limit: Int): [Verification!]!
+}
+
+type Mutation {
+  verifyID(front: Upload!): Verification!
+}
