@@ -1,70 +1,206 @@
-# Getting Started with Create React App
+AI ID Verification Frontend
+Overview
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This React-based frontend provides a clean and modern interface for uploading ID cards and performing AI-powered authenticity checks.
+It communicates with a Node.js GraphQL backend, which then communicates with a Python FastAPI service for verification.
 
-## Available Scripts
+The frontend is responsible for:
 
-In the project directory, you can run:
+Uploading the front-side photo of an ID card
 
-### `npm start`
+Triggering the backend GraphQL mutation verifyID
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Displaying parsed ID fields such as Name, DOB, ID Number, Gender, etc.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Rendering the full AI verification report
 
-### `npm test`
+Showing collapsible sections for:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Text Format Checks
 
-### `npm run build`
+Visual Forgery Checks
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Security Features
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Raw OCR Text
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Displaying check results with status colors (Green for PASSED, Red for FAILED)
 
-### `npm run eject`
+Fetching and showing verification history from the backend
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Tech Stack
+Component	Description
+React (CRA)	Frontend framework for UI components
+Apollo Client	Sends GraphQL queries and mutations
+GraphQL Upload Client	Enables file uploads over GraphQL
+CSS	Custom responsive styling
+Node.js Backend	Handles API logic and stores results via Prisma
+Python FastAPI	Runs AI ID verification using OpenAI
+How the Frontend Works
+1. User selects an ID card image
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The user uploads the front side of the ID card using the file input inside App.jsx.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+2. Apollo Upload Client processes the file
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+apollo-upload-client automatically converts the uploaded file into a GraphQL Upload scalar.
 
-## Learn More
+3. GraphQL mutation is triggered
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The frontend sends the following mutation to the backend:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+mutation($front: Upload!) {
+  verifyID(front: $front) {
+    verdict
+    parsed_id_data
+    raw_json
+    created_at
+  }
+}
 
-### Code Splitting
+4. Backend receives and processes the image
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+The Node backend:
 
-### Analyzing the Bundle Size
+Saves the uploaded file temporarily
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Sends the image to the Python verification service
 
-### Making a Progressive Web App
+Receives AI-generated results
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Stores them in PostgreSQL via Prisma
 
-### Advanced Configuration
+Responds back with the final verification object
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+5. Frontend displays the results
 
-### Deployment
+The React UI then shows:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Verdict (Original or Fake)
 
-### `npm run build` fails to minify
+Parsed fields from the ID
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Dropdown sections with full check results
+
+Raw OCR extracted text
+
+Security feature evaluation
+
+Timestamp of verification
+
+Status coloring:
+
+PASSED = Green
+
+FAILED = Red
+
+Folder Structure
+frontend/
+│── public/
+│── src/
+│   ├── App.jsx
+│   ├── index.js
+│   ├── apolloClient.js
+│   ├── style.css
+│   └── components/     (optional future expansion)
+│── package.json
+│── README.md
+
+How to Run the Frontend
+1. Install dependencies
+
+Run inside the frontend folder:
+
+npm install --legacy-peer-deps
+
+
+The flag is required because apollo-upload-client uses older peer dependencies.
+
+2. Start the React development server
+npm start
+
+
+The app will be available at:
+
+http://localhost:3000
+
+
+Make sure your backend and Python services are also running:
+
+Backend (inside backend folder):
+
+npm run dev
+
+
+Python service (inside python-service folder):
+
+uvicorn main:app --reload --port 8001
+
+Configuration
+
+The GraphQL API endpoint used by the frontend is:
+
+http://localhost:4000/graphql
+
+
+Configured in src/apolloClient.js:
+
+createUploadLink({
+  uri: "http://localhost:4000/graphql"
+});
+
+
+Change this if deploying to cloud environments.
+
+UI Features
+
+Clean card-based layout
+
+Large image upload area
+
+Loading indicator during verification
+
+Full verification details panel
+
+Expandable dropdown sections
+
+Color-coded check statuses
+
+Error handling UI
+
+Fully responsive design
+
+Important Files
+App.jsx
+
+Handles:
+
+Image upload
+
+Calling the GraphQL mutation
+
+Rendering all results
+
+apolloClient.js
+
+Sets up:
+
+Apollo Client
+
+Upload Link
+
+GraphQL connectivity
+
+style.css
+
+Contains:
+
+Layout
+
+Typography
+
+Card design
+
+Color styles
+
+Dropdown animations
